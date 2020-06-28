@@ -16,6 +16,7 @@ class TableController extends Controller
      */
     public function index()
     {
+        //poour avoir toute les projet et le total d anomalie pour chaque projet
         $total_anomalie =  DB::select(DB::raw(" SELECT mantis_project_table.id ,mantis_project_table.name ,COUNT(mantis_bug_table.project_id ) as total_anomalie
         from mantis_project_table  join mantis_bug_table
         on mantis_project_table.id = mantis_bug_table.project_id
@@ -28,7 +29,7 @@ class TableController extends Controller
             $total_anomalie[$i]->amelioration_encour = 0;
         }
 
-        //
+        //pour avoir les status des beug
         $beug_etat = DB::select(DB::raw("  SELECT mantis_project_table.id , mantis_project_table.name,mantis_bug_table.status,mantis_category_table.name ,COUNT(mantis_category_table.name ) as total
         from mantis_project_table  join mantis_bug_table
               on mantis_project_table.id = mantis_bug_table.project_id
@@ -36,7 +37,7 @@ class TableController extends Controller
               on mantis_category_table.id = mantis_bug_table.category_id
               WHERE mantis_category_table.name ='bug'
               GROUP BY mantis_project_table.id , mantis_project_table.name,mantis_bug_table.status,mantis_category_table.name"));
-        //
+        // //pour avoir les status des amilioration
         $amelioration_etat = DB::select(DB::raw("  SELECT mantis_project_table.id , mantis_project_table.name,mantis_bug_table.status,mantis_category_table.name ,COUNT(mantis_category_table.name ) as total
         from mantis_project_table  join mantis_bug_table
               on mantis_project_table.id = mantis_bug_table.project_id
@@ -45,7 +46,7 @@ class TableController extends Controller
               WHERE mantis_category_table.name ='amélioration'
               GROUP BY mantis_project_table.id ,mantis_bug_table.status
         "));
-        //
+        //pour affecter a chaque projet leur statistique (beug resolu est en cour,amelioration resolu et en cour)
         foreach ($beug_etat as $item) {
 
             if ($item->status == 80 || $item->status == 90) {
@@ -84,6 +85,8 @@ class TableController extends Controller
 
         return view('table', ['projects' => $total_anomalie]);
     }
+
+    // c'est une fonction qui return resultat json pour le client avec Angular
     public function projects()
     {
         $total_anomalie =  DB::select(DB::raw(" SELECT mantis_project_table.id ,mantis_project_table.name ,COUNT(mantis_bug_table.project_id ) as total_anomalie
